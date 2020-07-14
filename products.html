@@ -172,6 +172,10 @@
                         v-if="submit ==='edit'"
                       />
                     </div>
+                    <div class="form-group">
+                      <label for="imgFile">或 上傳圖片</label>
+                      <input type="file" id="imgFile" class="form-control" @change="uploadFile">
+                    </div>
                     <img
                       :src="productTemp.imageUrl[0]"
                       class="img-fluid"
@@ -484,6 +488,29 @@
               this.$emit("update");
               $("#productModal").modal("hide");
             });
+          },
+          // 上傳圖片
+          uploadFile() {
+            // 選取 DOM 中的檔案資訊
+            const uploadedFile = document.querySelector("#imgFile").files[0];
+            //  轉成 Form Data
+            const formData = new FormData();
+            formData.append("file", uploadedFile);
+            // 路由、驗證
+            const api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/storage`;
+            axios
+              .post(api, formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              })
+              .then((res) => {
+                this.productTemp.imageUrl.push(res.data.data.path);
+                alert("圖片上傳成功");
+              })
+              .catch((err) => {
+                alert("上傳失敗，圖片不可超過2MB");
+              });
           },
           cancel() {
             this.productTemp = {
