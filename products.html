@@ -153,22 +153,22 @@
               <div class="container-fluid">
                 <div class="row">
                   <div class="col-4">
-                    <div class="form-group">
-                      <label for="imageUrl">輸入圖片網址</label><br />
+                    <div class="form-group" v-for="i in 5" :key="i + 'img'">
+                      <label :for="'img' + i">輸入圖片網址</label><br />
                       <input
-                        id="imageUrl"
+                      :id="'img' + i"
                         type="text"
                         class="form-control"
                         placeholder="請輸入圖片連結"
-                        v-model="productTemp.imageUrl[0]"
+                        v-model="productTemp.imageUrl[i -1]"
                         v-if="submit === 'add'"
                       />
                       <input
-                        id="imageUrl"
+                      :id="'img' + i"
                         type="text"
                         class="form-control"
                         placeholder="請輸入圖片連結"
-                        v-model="editProductTemp.imageUrl[0]"
+                        v-model="editProductTemp.imageUrl[i-1]"
                         v-if="submit ==='edit'"
                       />
                     </div>
