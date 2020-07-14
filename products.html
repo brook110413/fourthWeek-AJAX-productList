@@ -89,19 +89,20 @@
           </tr>
         </tbody>
       </table>
+      <pagination :pages="pagination" @emit-pages="getProducts"></pagination>
 
       <!-- Modal -->
       <!-- 新增、編輯產品modal -->
       <product-modal
         :submit="submit"
         :edit-product-temp="productTemp"
-        @update="getProduct"
+        @update="getProducts"
       ></product-modal>
 
       <!-- 刪除產品modal -->
       <del-product-modal
         :product-temp="productTemp"
-        @update="getProduct"
+        @update="getProducts"
       ></del-product-modal>
     </div>
 
@@ -191,7 +192,7 @@
                   </div>
                   <div class="col-8">
                     <div class="form-group">
-                      <label for="title">標題</label>
+                      <label for="title">產品名稱</label>
                       <input
                         id="title"
                         type="text"
@@ -434,6 +435,25 @@
       </div>
     </script>
 
+    <!-- 分頁元件模板 -->
+    <script type="text/x-template" id="pagination">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item" :class="{'disabled': pages.current_page === 1}">
+            <a class="page-link" href="#" aria-label="Previous" @click.prevent="emitPages(pages.current_page - 1)">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item" :class="{'active':pages.current_page === item }" v-for="(item,key) in pages.total_pages" :key="key"><a class="page-link" href="#" @click.prevent="emitPages(item)">{{item}}</a></li>
+          <li class="page-item" :class="{'disabled': pages.current_page === pages.total_pages}">
+            <a class="page-link" href="#" aria-label="Next" @click.prevent="emitPages(pages.current_page + 1)">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </script>
+
     <script>
       Vue.component("product-modal", {
         template: "#productModal",
@@ -484,10 +504,15 @@
           },
           editProduct() {
             let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.editProductTemp.id}`;
-            axios.patch(api, this.editProductTemp).then((res) => {
-              this.$emit("update");
-              $("#productModal").modal("hide");
-            });
+            axios
+              .patch(api, this.editProductTemp)
+              .then((res) => {
+                this.$emit("update");
+                $("#productModal").modal("hide");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           },
           // 上傳圖片
           uploadFile() {
@@ -534,10 +559,15 @@
         methods: {
           delProduct() {
             let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.productTemp.id}`;
-            axios.delete(api).then((res) => {
-              this.$emit("update");
-              $("#delProductModal").modal("hide");
-            });
+            axios
+              .delete(api)
+              .then((res) => {
+                this.$emit("update");
+                $("#delProductModal").modal("hide");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           },
           cancel() {
             this.productTemp = {
@@ -547,9 +577,24 @@
         },
       });
 
+      Vue.component("pagination", {
+        template: "#pagination",
+        props: {
+          pages: {
+            type: Object,
+          },
+        },
+        methods: {
+          emitPages(item) {
+            this.$emit("emit-pages", item);
+          },
+        },
+      });
+
       new Vue({
         el: "#app",
         data: {
+          pagination: {},
           products: [],
           productTemp: {
             imageUrl: [],
@@ -571,19 +616,26 @@
           if (this.user.token == "") {
             window.location = "logIn.html";
           } else {
-            this.getProduct();
+            this.getProducts();
           }
         },
         methods: {
           // 取得遠端資料
-          getProduct() {
-            let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/products`;
+          getProducts(page = 1) {
+            let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/products?page=${page}`;
             axios.defaults.headers[
               "Authorization"
             ] = `Bearer ${this.user.token}`;
-            axios.get(api).then((res) => {
-              this.products = [...res.data.data];
-            });
+            axios
+              .get(api)
+              .then((res) => {
+                this.products = res.data.data;
+                // 取得分頁資料
+                this.pagination = res.data.meta.pagination;
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           },
           // 取得產品資料到productTemp
           getProductTemp(item) {
@@ -591,10 +643,14 @@
               ...item,
             };
             let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.productTemp.id}`;
-            axios.get(api).then((res) => {
-              console.log(res.data.data);
-              this.productTemp = res.data.data;
-            });
+            axios
+              .get(api)
+              .then((res) => {
+                this.productTemp = res.data.data;
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           },
           // 對originPrice和price 進行排序
           sortPrice() {
