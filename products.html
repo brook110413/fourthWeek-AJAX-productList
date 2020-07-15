@@ -101,7 +101,7 @@
 
       <!-- 刪除產品modal -->
       <del-product-modal
-        :product-temp="productTemp"
+        :del-product-temp="productTemp"
         @update="getProducts"
       ></del-product-modal>
     </div>
@@ -413,7 +413,7 @@
             <div class="modal-body">
               是否刪除
               <span class="text-danger font-weight-bold">
-                {{productTemp.title}}
+                {{delProductTemp.title}}
               </span>
               商品(刪除後將無法回復)
             </div>
@@ -463,6 +463,7 @@
             productTemp: {
               imageUrl: [],
             },
+            editTemp: this.editProductTemp,
             user: {
               uuid: "069602ae-7e90-4b68-ab74-eede1d9ee78e",
               token: "",
@@ -547,9 +548,12 @@
 
       Vue.component("del-product-modal", {
         template: "#delProductModal",
-        props: ["product-temp"],
+        props: ["del-product-temp"],
         data() {
           return {
+            productTemp: {
+              image: [],
+            },
             user: {
               uuid: "069602ae-7e90-4b68-ab74-eede1d9ee78e",
               token: "",
@@ -558,7 +562,7 @@
         },
         methods: {
           delProduct() {
-            let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.productTemp.id}`;
+            let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.delProductTemp.id}`;
             axios
               .delete(api)
               .then((res) => {
@@ -642,15 +646,6 @@
             this.productTemp = {
               ...item,
             };
-            let api = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/product/${this.productTemp.id}`;
-            axios
-              .get(api)
-              .then((res) => {
-                this.productTemp = res.data.data;
-              })
-              .catch((err) => {
-                console.log(err);
-              });
           },
           // 對originPrice和price 進行排序
           sortPrice() {
