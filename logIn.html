@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head class="h-100">
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>登入頁面</title>
@@ -8,57 +8,53 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css"
     />
-
-    <style>
-      html,
-      body {
-        height: 100%;
-      }
-    </style>
   </head>
-
-  <body class="d-flex justify-content-center align-items-center text-center">
+  <style>
+    html,
+    body {
+      height: 100vh;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+  <body>
     <div id="app">
-      <div class="container">
-        <form @submit.prevent="logIn">
-          <h1 class="h3 mb-3">
-            請先登入
-          </h1>
-          <div class="form-group">
-            <label for="email" class="sr-only">Email address</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              aria-describedby="emailHelp"
-              placeholder="請輸入電子郵件"
-              required
-              v-model="user.email"
-            />
-          </div>
-          <div class="form-group">
-            <label for="password" class="sr-only">Password</label>
-            <input
-              type="password"
-              class="form-control"
-              id="password"
-              placeholder="請輸入密碼"
-              required
-              v-model="user.password"
-            />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            登入
-          </button>
-        </form>
-      </div>
+      <form class="text-center" @submit.prevent="logIn">
+        <h1>
+          請先登入
+        </h1>
+        <div class="form-group">
+          <label for="exampleInputEmail1" class="sr-only">Email address</label>
+          <input
+            type="email"
+            class="form-control"
+            id="exampleInputEmail1"
+            aria-describedby="emailHelp"
+            placeholder="請輸電子郵件"
+            v-model="user.email"
+          />
+        </div>
+        <div class="form-group">
+          <label for="exampleInputPassword1" class="sr-only">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="exampleInputPassword1"
+            placeholder="請輸入密碼"
+            v-model="user.password"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          登入
+        </button>
+      </form>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
     <script>
-      const apiPath = "https://course-ec-api.hexschool.io/";
       new Vue({
         el: "#app",
         data: {
@@ -69,23 +65,21 @@
         },
         methods: {
           logIn() {
-            let api = `${apiPath}api/auth/login`;
+            const url = "https://course-ec-api.hexschool.io/api/auth/login";
             axios
-              .post(api, this.user)
+              .post(url, this.user)
               .then((res) => {
                 console.log(res);
                 const token = res.data.token;
                 const expired = res.data.expired;
-
-                // 將api取得的token和expired存入cookie內
+                // 將取得的token存入cookie
                 document.cookie = `token=${token}; expires=${new Date(
                   expired * 1000
-                )}`;
+                )};`;
                 window.location = "products.html";
               })
-              .catch((error) => {
-                console.log(error);
-                alert("信箱、密碼錯誤，請重新輸入");
+              .catch((err) => {
+                console.log(err);
               });
           },
         },
