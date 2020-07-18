@@ -437,6 +437,9 @@
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
             "$1"
           );
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${this.user.token}`;
           if (this.user.token === "") {
             window.location = "logIn.html";
           } else {
@@ -450,9 +453,6 @@
           },
           getProducts(page = 1) {
             const url = `https://course-ec-api.hexschool.io/api/${this.user.uuid}/admin/ec/products?page=${page}`;
-            axios.defaults.headers.common[
-              "Authorization"
-            ] = `Bearer ${this.user.token}`;
             axios
               .get(url)
               .then((res) => {
